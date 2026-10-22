@@ -8,6 +8,7 @@ const rowsEl = document.getElementById("rows");
 const statusEl = document.getElementById("status");
 const bulkBtn = document.getElementById("bulk-delete");
 const selectAll = document.getElementById("select-all");
+let bulkDeleting = false;
 
 async function api(method, url, body) {
   const res = await fetch(url, {
@@ -24,6 +25,14 @@ function setStatus(text) {
   statusEl.textContent = text;
 }
 
+function setBulkDeleting(value) {
+  bulkDeleting = value;
+  bulkBtn.textContent = value ? "Deleting..." : "Delete selected";
+  bulkBtn.setAttribute("aria-busy", String(value));
+  bulkBtn.classList.toggle("loading", value);
+  bulkBtn.disabled = value || selected.size === 0;
+}
+
 async function load() {
   contacts = await api("GET", "/api/contacts");
   render();
@@ -37,7 +46,7 @@ function el(tag, props = {}, ...children) {
 
 function render() {
   rowsEl.replaceChildren(...contacts.map(renderRow));
-  bulkBtn.disabled = selected.size === 0;
+  bulkBtn.disabled = bulkDeleting || selected.size === 0;
   selectAll.checked = contacts.length > 0 && selected.size === contacts.length;
 }
 
@@ -83,7 +92,7 @@ async function saveEdit(id, inputs) {
     setStatus("Saved.");
     await load();
   } catch (err) {
-    setStatus(err.message);
+    setStatus(`Could not save contact: ${err.message}`);
   }
 }
 
@@ -94,21 +103,23 @@ async function deleteContact(id) {
     setStatus("Deleted.");
     await load();
   } catch (err) {
-    setStatus(err.message);
+    setStatus(`Could not delete contact: ${err.message}`);
   }
 }
 
 bulkBtn.addEventListener("click", async () => {
   const ids = [...selected];
   setStatus(`Deleting ${ids.length}...`);
-  bulkBtn.disabled = true;
+  setBulkDeleting(true);
   try {
     await api("POST", "/api/contacts/bulk-delete", { ids });
     selected.clear();
     setStatus(`Deleted ${ids.length}.`);
     await load();
   } catch (err) {
-    setStatus(err.message);
+    setStatus(`Could not delete selected contacts: ${err.message}`);
+  } finally {
+    setBulkDeleting(false);
     render();
   }
 });
@@ -129,8 +140,8 @@ document.getElementById("add-form").addEventListener("submit", async (e) => {
     setStatus("Added.");
     await load();
   } catch (err) {
-    setStatus(err.message);
+    setStatus(`Could not add contact: ${err.message}`);
   }
 });
 
-load();
+load().catch((err) => setStatus(`Could not load contacts: ${err.message}`));
