@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Contacts</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <main>
+    <h1>Contacts</h1>
+
+    <form id="add-form">
+      <input name="name" placeholder="Name" required>
+      <input name="email" placeholder="Email">
+      <input name="phone" placeholder="Phone">
+      <input name="notes" placeholder="Notes">
+      <button type="submit">Add</button>
+    </form>
+
+    <div class="toolbar">
+      <button id="bulk-delete" type="button" disabled>Delete selected</button>
+      <span id="status"></span>
+    </div>
+
+    <table>
+      <thead>
+        <tr>
+          <th><input type="checkbox" id="select-all" aria-label="Select all"></th>
+          <th>Name</th><th>Email</th><th>Phone</th><th>Notes</th><th></th>
+        </tr>
+      </thead>
+      <tbody id="rows"></tbody>
+    </table>
+  </main>
+  <script src="app.js"></script>
+</body>
+</html>

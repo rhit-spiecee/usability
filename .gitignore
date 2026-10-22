@@ -1,0 +1,4 @@
+contacts.db
+__pycache__/
+.venv/
+venv/
